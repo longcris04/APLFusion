@@ -1,0 +1,6 @@
+# Tested with Python 3.11, PyTorch 2.6.0 (CUDA 12.4), kornia 0.8.1, NumPy 2.2, OpenCV 5.0, Pillow 12.3.
+torch==2.6.0
+kornia==0.8.1
+numpy>=1.23
+opencv-python-headless>=4.5
+pillow>=9.0

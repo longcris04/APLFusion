@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# data and outputs of train.py / test.py / evaluation/evaluate.py
+data/
+runs/
+results/
