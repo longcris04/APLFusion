@@ -25,6 +25,7 @@ import os
 import platform
 import random
 import time
+import warnings
 
 import kornia
 import numpy as np
@@ -62,6 +63,22 @@ def seed_everything(seed):
     np.random.seed(seed % 2 ** 32)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
+
+
+def make_deterministic():
+    """Deterministic GPU algorithms: the same seed, GPU and software give the same model, bit for bit.
+
+    cuDNN's benchmark mode (used for the paper's models) times several convolution algorithms
+    and keeps the fastest, so two runs can differ; at lr 5e-3 the differences grow to about 0.01
+    in the 4-fold means. The one kernel PyTorch flags as non-deterministic, the backward of the
+    reflection padding in kornia's SSIM, still gave bit-identical models in repeated runs on two
+    A100 nodes, so its warning is silenced.
+    """
+    os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    torch.use_deterministic_algorithms(True, warn_only=True)
+    warnings.filterwarnings("ignore", message="reflection_pad2d_backward_cuda does not have a deterministic")
 
 
 @torch.no_grad()
@@ -111,7 +128,7 @@ def main(argv=None):
         print(f"note: --stage1-epochs {args.stage1_epochs} >= --epochs {args.epochs}, Stage 2 never starts")
 
     seed_everything(args.seed)
-    torch.backends.cudnn.benchmark = True
+    make_deterministic()
 
     images = PairImages.from_split(args.data_root, args.pair, args.fold, "train")
     train_set = FusionDataset(images)

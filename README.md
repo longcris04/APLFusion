@@ -181,6 +181,12 @@ done
 A run takes 25–35 s on an A100, including the one-off DINOv2 embedding of the training sources
 (Stage 2 then only embeds $I_f$ at each step).
 
+Training is deterministic: the seed fixes the initial weights and the order of the batches, and
+`train.py` uses deterministic cuDNN algorithms, so two runs with the same seed, GPU and software
+give the same model, bit for bit (tested with PyTorch 2.6.0, CUDA 12.4 and cuDNN 9.1 on two A100
+nodes). A different GPU or library version can give a slightly different model. A retrained
+model is not the paper's model, see [Results](#results).
+
 ## Testing
 
 ```bash
@@ -221,10 +227,13 @@ table without training:
 | PET-MRI | 0.3079 | 0.7603 | 0.8512 | 0.8953 | 0.9225 | 0.8957 | 0.7172 | 0.6091 |
 | SPECT-MRI | 0.2215 | 0.7292 | 0.8713 | 0.8934 | 0.8988 | 0.8603 | 0.7471 | 0.6525 |
 
-Training on a GPU is not bit-for-bit deterministic (cuDNN picks convolution algorithms by
-timing, and training at lr 5e-3 amplifies small numerical differences), so a retrained model is
-not identical to the paper's. Retraining the 12 models with this code on an A100 gave means within
-0.006 of the table above for every task and metric, except $Q_{CB}$ on SPECT-MRI (+0.009).
+The paper's models were trained with cuDNN's benchmark mode, which picks convolution algorithms
+by timing and is not deterministic: two runs of the same setting give different models, and at
+lr 5e-3 their 4-fold means differ by up to about 0.01. Retraining therefore does not give the
+paper's models exactly. Retrained with `train.py` (seed 0, A100, PyTorch 2.6.0, CUDA 12.4, cuDNN 9.1),
+the 4-fold means differ from the table by at most 0.005 in $Q^{AB/F}$, FMI, $Q_S$, $Q_W$, $Q_E$
+and SSIM, 0.010 in SD and 0.020 in $Q_{CB}$ (SPECT-MRI; 0.005 on the other tasks). The
+[pretrained models](#pretrained-models) give the table exactly.
 
 ## Complexity
 
