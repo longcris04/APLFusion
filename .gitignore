@@ -2,7 +2,13 @@ __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
 
-# data and outputs of train.py / test.py / evaluation/evaluate.py
-data/
-runs/
-results/
+# data, downloaded checkpoints and outputs of train.py / test.py / evaluation/evaluate.py:
+# the folders are kept (empty, with a .gitkeep), their contents are not
+data/*
+checkpoints/*
+runs/*
+results/*
+!data/.gitkeep
+!checkpoints/.gitkeep
+!runs/.gitkeep
+!results/.gitkeep
